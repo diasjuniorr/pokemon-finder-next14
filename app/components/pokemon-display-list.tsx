@@ -7,6 +7,7 @@ import { Pokemon, PokemonSpecies } from "@/entities/pokemon";
 import { fetchPokemonsData } from "@/features/get-pokemons-species";
 import { getPokemonEvolutionChain } from "@/features/get-pokemon-evolution-chain";
 import { SkeletonCard } from "./skeleton-card";
+import { usePokemonList } from "@/hooks/use-pokemon-list";
 
 interface TextInputProps {
   placeholder: string;
@@ -59,15 +60,24 @@ const SelectComponent = ({
 };
 
 const PokemonDisplayList = ({ list }: { list: Pokemon[] }) => {
-  const [pokemonList, setPokemonList] = useState<PokemonSpecies[]>([]);
-  const [pokemonSpeciesList, setPokemonSpeciesList] = useState<
-    PokemonSpecies[]
-  >([]);
+  const {
+    newPokemonList,
+    filteredPokemonList,
+    filterByGeneration,
+    filterByType,
+    filterByPokemonName,
+    typeFilter,
+    typeList,
+    generationFilter,
+    generationList,
+    resetFilteredList,
+    resetFilterOptions,
+    setTypeFilter,
+    setGenerationFilter,
+    resetDisplayPokemonList,
+    displayPokemonList,
+  } = usePokemonList();
   const [textInputValue, setTextInputValue] = useState("");
-  const [generationList, setGenerationList] = useState<string[]>([]);
-  const [typeList, setTypeList] = useState<string[]>([]);
-  const [generationFilter, setGenerationFilter] = useState<string>("");
-  const [typeFilter, setTypeFilter] = useState<string>("");
 
   const handleTextInputChange = (value: string) => {
     setTextInputValue(value);
@@ -84,80 +94,32 @@ const PokemonDisplayList = ({ list }: { list: Pokemon[] }) => {
   };
 
   useEffect(() => {
-    fetchPokemonsData(list.slice(0, 10)).then((data) => {
-      setPokemonSpeciesList(data);
-    });
+    newPokemonList(list, 30);
   }, [list]);
 
   useEffect(() => {
     if (textInputValue.length === 0) {
-      fetchPokemonsData(list.slice(0, 30)).then((data) => {
-        setPokemonList(data);
-      });
+      resetFilteredList();
       return;
     }
 
     const debounced = _debounce(() => {
-      const pokemonFound = list.find((pokemon) =>
-        pokemon.name.includes(textInputValue)
-      );
-
-      getPokemonEvolutionChain(pokemonFound ? pokemonFound.name : "").then(
-        (data) => {
-          setPokemonList(data);
-        }
-      );
+      filterByPokemonName(textInputValue);
     }, 500);
     debounced();
     return debounced.cancel;
   }, [textInputValue]);
 
   useEffect(() => {
-    if (pokemonList.length === 0) {
-      return;
-    }
-
-    setPokemonSpeciesList(pokemonList);
-    setGenerationList(
-      ["-"].concat(
-        Array.from(new Set(pokemonList.map((pokemon) => pokemon.generation)))
-      )
-    );
-    setTypeList(
-      ["-"].concat(
-        Array.from(new Set(pokemonList.map((pokemon) => pokemon.types).flat()))
-      )
-    );
-  }, [pokemonList]);
+    resetFilterOptions();
+  }, [displayPokemonList]);
 
   useEffect(() => {
-    setGenerationFilter("");
-  }, [generationList]);
-
-  useEffect(() => {
-    setTypeFilter("");
-  }, [typeList]);
-
-  useEffect(() => {
-    if (!generationFilter || generationFilter === "-") {
-      setPokemonSpeciesList(pokemonList);
-      return;
-    }
-
-    setPokemonSpeciesList(
-      pokemonList.filter((pokemon) => pokemon.generation === generationFilter)
-    );
+    filterByGeneration(generationFilter);
   }, [generationFilter]);
 
   useEffect(() => {
-    if (!typeFilter || typeFilter === "-") {
-      setPokemonSpeciesList(pokemonList);
-      return;
-    }
-
-    setPokemonSpeciesList(
-      pokemonList.filter((pokemon) => pokemon.types.includes(typeFilter))
-    );
+    filterByType(typeFilter);
   }, [typeFilter]);
 
   return (
@@ -185,11 +147,11 @@ const PokemonDisplayList = ({ list }: { list: Pokemon[] }) => {
           onChange={handleTypeFilterChange}
         />
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 max-w-screen-lg mx-auto">
-          {pokemonSpeciesList.length === 0
+          {displayPokemonList.length === 0
             ? Array.from({ length: 10 }).map((_, index) => (
                 <SkeletonCard key={index} />
               ))
-            : pokemonSpeciesList.map((pokemon) => (
+            : displayPokemonList.map((pokemon) => (
                 <Link href={`/pokemon/${pokemon.name}`} key={pokemon.name}>
                   <div
                     key={pokemon.name}
