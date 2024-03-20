@@ -7,6 +7,7 @@ export type TPokemonListState = {
   initialPokemonList: PokemonSpecies[];
   filteredPokemonList: PokemonSpecies[];
   displayPokemonList: PokemonSpecies[];
+  searchTerm: string;
   typeList: string[];
   generationList: string[];
   typeFilter: string;
@@ -22,6 +23,7 @@ export type TPokemonListActions = {
   setGenerationList: (list: string[]) => void;
   setTypeFilter: (type: string) => void;
   setGenerationFilter: (generation: string) => void;
+  setSearchTerm: (term: string) => void;
 };
 
 export const usePokemonListStore = create<
@@ -33,6 +35,10 @@ export const usePokemonListStore = create<
         pokemonNames: [] as Pokemon[],
         initialPokemonList: [] as PokemonSpecies[],
         displayPokemonList: [] as PokemonSpecies[],
+        searchTerm: "",
+        setSearchTerm(term) {
+          set({ searchTerm: term });
+        },
         setDisplayPokemonList(list) {
           set({ displayPokemonList: list });
         },

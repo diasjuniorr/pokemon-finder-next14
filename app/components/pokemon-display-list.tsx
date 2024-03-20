@@ -3,9 +3,7 @@ import _debounce from "lodash/debounce";
 import { ChangeEvent, useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Pokemon, PokemonSpecies } from "@/entities/pokemon";
-import { fetchPokemonsData } from "@/features/get-pokemons-species";
-import { getPokemonEvolutionChain } from "@/features/get-pokemon-evolution-chain";
+import { Pokemon } from "@/entities/pokemon";
 import { SkeletonCard } from "./skeleton-card";
 import { usePokemonList } from "@/hooks/use-pokemon-list";
 
@@ -61,64 +59,16 @@ const SelectComponent = ({
 
 const PokemonDisplayList = ({ list }: { list: Pokemon[] }) => {
   const {
-    newPokemonList,
-    filterByGeneration,
-    filterByType,
-    filterByPokemonName,
     typeFilter,
     typeList,
     generationFilter,
     generationList,
-    resetFilteredList,
-    resetFilterOptions,
-    setTypeFilter,
-    setGenerationFilter,
     displayPokemonList,
-  } = usePokemonList();
-  const [textInputValue, setTextInputValue] = useState("");
-
-  const handleTextInputChange = (value: string) => {
-    setTextInputValue(value);
-  };
-
-  const handleTypeFilterChange = (event: ChangeEvent<HTMLSelectElement>) => {
-    setTypeFilter(event.target.value);
-  };
-
-  const handleGenerationFilterChange = (
-    event: ChangeEvent<HTMLSelectElement>
-  ) => {
-    setGenerationFilter(event.target.value);
-  };
-
-  useEffect(() => {
-    newPokemonList(list, 30);
-  }, [list]);
-
-  useEffect(() => {
-    if (textInputValue.length === 0) {
-      resetFilteredList();
-      return;
-    }
-
-    const debounced = _debounce(() => {
-      filterByPokemonName(textInputValue);
-    }, 500);
-    debounced();
-    return debounced.cancel;
-  }, [textInputValue]);
-
-  useEffect(() => {
-    resetFilterOptions();
-  }, [displayPokemonList]);
-
-  useEffect(() => {
-    filterByGeneration(generationFilter);
-  }, [generationFilter]);
-
-  useEffect(() => {
-    filterByType(typeFilter);
-  }, [typeFilter]);
+    searchTerm,
+    handleSearchTermChange,
+    handleGenerationFilterChange,
+    handleTypeFilterChange,
+  } = usePokemonList({ list, initialListSize: 30 });
 
   return (
     <div className="bg-gradient-to-br from-green-500 to-cyan-500 min-h-screen">
@@ -130,8 +80,8 @@ const PokemonDisplayList = ({ list }: { list: Pokemon[] }) => {
           </label>
           <TextInput
             placeholder="Type something..."
-            value={textInputValue}
-            onChange={handleTextInputChange}
+            value={searchTerm}
+            onChange={handleSearchTermChange}
           />
         </div>
         <SelectComponent

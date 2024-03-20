@@ -9,6 +9,11 @@ const PokemonPage = async ({ params }: { params: { name: string } }) => {
   return (
     <div className="bg-gradient-to-br from-green-500 to-cyan-500 min-h-screen">
       <div className="container mx-auto px-4">
+        <h1 className="mb-4 text-4xl font-extrabold leading-none tracking-tight text-gray-900  dark:text-white">
+          {`${pokemon.name.charAt(0).toUpperCase()}${pokemon.name.slice(1)}`}{" "}
+          Evolution Chain
+        </h1>
+
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4 max-w-screen-lg mx-auto">
           {evolutionChain.map((evolution) => (
             <Link href={`/pokemon/${evolution.name}`} key={evolution.name}>
