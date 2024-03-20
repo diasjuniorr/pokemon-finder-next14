@@ -7,7 +7,6 @@ import { Pokemon, PokemonSpecies } from "@/entities/pokemon";
 import { fetchPokemonsData } from "@/features/get-pokemons-species";
 import { getPokemonEvolutionChain } from "@/features/get-pokemon-evolution-chain";
 import { SkeletonCard } from "./skeleton-card";
-import { set } from "lodash";
 
 interface TextInputProps {
   placeholder: string;
