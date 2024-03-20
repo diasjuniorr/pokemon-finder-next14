@@ -124,7 +124,6 @@ export function usePokemonList() {
     filterByType,
     resetFilteredList,
     resetFilterOptions,
-    resetDisplayPokemonList,
     generationFilter,
     setGenerationFilter,
     generationList,

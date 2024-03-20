@@ -62,7 +62,6 @@ const SelectComponent = ({
 const PokemonDisplayList = ({ list }: { list: Pokemon[] }) => {
   const {
     newPokemonList,
-    filteredPokemonList,
     filterByGeneration,
     filterByType,
     filterByPokemonName,
@@ -74,7 +73,6 @@ const PokemonDisplayList = ({ list }: { list: Pokemon[] }) => {
     resetFilterOptions,
     setTypeFilter,
     setGenerationFilter,
-    resetDisplayPokemonList,
     displayPokemonList,
   } = usePokemonList();
   const [textInputValue, setTextInputValue] = useState("");
