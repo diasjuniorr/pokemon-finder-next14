@@ -1,4 +1,10 @@
 import { Pokemon, PokemonSpecies } from "@/entities/pokemon";
+import {
+  ErrorResponse,
+  SuccessResponse,
+  errorResponse,
+  successResponse,
+} from "@/shared/responses";
 
 export type ListPokemonDataResponse = [
   ListPokemonDataFailureResponse,
@@ -6,7 +12,8 @@ export type ListPokemonDataResponse = [
 ];
 
 export interface ListPokemonDataFailureResponse {
-  error: Error | null;
+  error?: Error;
+  code?: number;
   hasError: boolean;
 }
 export interface ListPokemonDataSuccessResponse {
@@ -20,16 +27,27 @@ export const listPokemonData = async (
     const pokemonResponse = await fetch(
       `https://pokeapi.co/api/v2/pokemon/${pokemon.name}`
     );
+
+    if (pokemonResponse.status === 404) {
+      return errorResponse(new Error("Pokemon not found"), 404);
+    }
+
     const pokemonData = await pokemonResponse.json();
 
     const result = await fetch(
       `https://pokeapi.co/api/v2/pokemon-species/${pokemon.name}`
     );
+
+    if (result.status === 404) {
+      return errorResponse(new Error("Pokemon species not found"), 404);
+    }
+
     const speciesData = await result.json();
 
     const id = pokemonData.id;
     const imageUrl = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${id}.png`;
-    return {
+
+    return successResponse<PokemonSpecies>({
       name: pokemon.name,
       imageUrl,
       types: pokemonData.types.map((type: any) => type.type.name),
@@ -40,29 +58,33 @@ export const listPokemonData = async (
       }),
       generation: speciesData.generation.name,
       evolutionChainId: speciesData.evolution_chain.url.split("/")[6],
-    };
+    });
   });
 
   const promisesResponse = await Promise.allSettled(speciesResponsePromises);
 
-  const [errorMapping, data] = mapPromiseResponses(promisesResponse);
+  const [errorMapping, response] = mapPromiseResponses(
+    promisesResponse as PromiseSettledResult<
+      [ErrorResponse, SuccessResponse<PokemonSpecies>]
+    >[]
+  );
+
   if (errorMapping.hasError) {
-    return [errorMapping, data];
+    return errorResponse(
+      (errorMapping.error as Error) || new Error("Failed to fetch data"),
+      errorMapping.code
+    );
   }
 
-  return [
-    {
-      error: null,
-      hasError: false,
-    },
-    data,
-  ];
+  return successResponse(response.data);
 };
 
 const mapPromiseResponses = (
-  promisesResponse: PromiseSettledResult<PokemonSpecies>[]
+  promisesResponse: PromiseSettledResult<
+    [ErrorResponse, SuccessResponse<PokemonSpecies>]
+  >[]
 ): [
-  { error: Error | null; hasError: boolean },
+  { error?: Error; code?: number; hasError: boolean },
   { data: PokemonSpecies[] | null }
 ] => {
   const hasError = promisesResponse.some(
@@ -70,26 +92,24 @@ const mapPromiseResponses = (
   );
 
   if (hasError) {
-    return [
-      {
-        error: new Error("Failed to fetch data"),
-        hasError: true,
-      },
-      { data: null },
-    ];
+    return errorResponse(new Error("Failed to fetch data"));
   }
 
-  const successResponse = promisesResponse.map(
-    (response) => (response as PromiseFulfilledResult<PokemonSpecies>).value
+  const response = promisesResponse.map(
+    (response) =>
+      (
+        response as unknown as PromiseFulfilledResult<
+          [ErrorResponse, SuccessResponse<PokemonSpecies>]
+        >
+      ).value
   );
 
   return [
     {
-      error: null,
       hasError: false,
     },
     {
-      data: successResponse,
+      data: response.map((r) => r[1].data!),
     },
   ];
 };
