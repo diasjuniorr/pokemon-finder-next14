@@ -1,9 +1,9 @@
 import _debounce from "lodash/debounce";
 import { Pokemon, PokemonSpecies } from "@/entities/pokemon";
 import { getPokemonEvolutionChain } from "@/features/get-pokemon-evolution-chain";
-import { fetchPokemonsData } from "@/features/get-pokemons-species";
 import { usePokemonListStore } from "@/store/pokemon-list-store";
 import { ChangeEvent, useCallback, useEffect } from "react";
+import { listPokemonData } from "@/features/get-pokemons-species";
 
 export function usePokemonList({
   list,
@@ -31,23 +31,32 @@ export function usePokemonList({
     typeList,
     searchTerm,
     setSearchTerm,
+    setHasError,
+    hasError,
   } = usePokemonListStore();
 
   const newPokemonList = useCallback(
-    (list: Pokemon[], initialSize: number) => {
+    async (list: Pokemon[], initialSize: number) => {
       setPokemonNames(list);
-      fetchPokemonsData(list.slice(0, initialListSize)).then(
-        (data: PokemonSpecies[]) => {
-          setInitialPokemonList(data);
-          setFilteredPokemonList(data);
-          setDisplayPokemonList(data);
-          setGenerationList(
-            newFilterOptions(data.map((pokemon) => pokemon.generation))
-          );
-          setTypeList(
-            newFilterOptions(data.map((pokemon) => pokemon.types).flat())
-          );
-        }
+
+      const [error, result] = await listPokemonData(
+        list.slice(0, initialListSize)
+      );
+      if (error.hasError) {
+        setHasError(true);
+        return;
+      }
+
+      const { data } = result;
+
+      setInitialPokemonList(data!);
+      setFilteredPokemonList(data!);
+      setDisplayPokemonList(data!);
+      setGenerationList(
+        newFilterOptions(data!.map((pokemon) => pokemon.generation))
+      );
+      setTypeList(
+        newFilterOptions(data!.map((pokemon) => pokemon.types).flat())
       );
     },
     [
@@ -58,11 +67,12 @@ export function usePokemonList({
       setGenerationList,
       setTypeList,
       initialListSize,
+      setHasError,
     ]
   );
 
   const filterByPokemonName = useCallback(
-    (name: string) => {
+    async (name: string) => {
       if (!name) {
         setFilteredPokemonList(initialPokemonList);
         setDisplayPokemonList(initialPokemonList);
@@ -79,16 +89,21 @@ export function usePokemonList({
         return;
       }
 
-      getPokemonEvolutionChain(pokemonFound.name).then((data) => {
-        setFilteredPokemonList(data);
-        setDisplayPokemonList(data);
-      });
+      const [error, result] = await getPokemonEvolutionChain(pokemonFound.name);
+      if (error.hasError) {
+        setHasError(true);
+        return;
+      }
+
+      setFilteredPokemonList(result.data!);
+      setDisplayPokemonList(result.data!);
     },
     [
       initialPokemonList,
       pokemonNames,
       setDisplayPokemonList,
       setFilteredPokemonList,
+      setHasError,
     ]
   );
 
@@ -217,6 +232,7 @@ export function usePokemonList({
     handleSearchTermChange,
     handleGenerationFilterChange,
     handleTypeFilterChange,
+    hasError,
   };
 }
 

@@ -17,6 +17,7 @@ const PokemonDisplayList = ({ list }: { list: Pokemon[] }) => {
     handleSearchTermChange,
     handleGenerationFilterChange,
     handleTypeFilterChange,
+    hasError,
   } = usePokemonList({ list, initialListSize: 30 });
 
   return (

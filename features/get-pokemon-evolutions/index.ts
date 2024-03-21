@@ -31,12 +31,7 @@ export const getPokemonEvolutions = async (
     );
   }
 
-  if (!result.data) {
-    console.log("No data found for pokemon", name);
-    return errorResponse(new Error("No data found for pokemon"));
-  }
-
-  const pokemon = result.data;
+  const pokemon = result.data!;
 
   try {
     const evolutionChainResponse = await fetch(

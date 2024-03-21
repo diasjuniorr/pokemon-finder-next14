@@ -25,13 +25,11 @@ export const getPokemonEvolutionChain = async (
     return errorResponse(error.error as Error);
   }
 
-  if (!result.data) {
-    return errorResponse(new Error("No data found for pokemon"));
-  }
-
   try {
     const response = await fetch(
-      `https://pokeapi.co/api/v2/evolution-chain/${result.data.evolutionChainId}`
+      `https://pokeapi.co/api/v2/evolution-chain/${
+        result.data!.evolutionChainId
+      }`
     );
     const data = await response.json();
 

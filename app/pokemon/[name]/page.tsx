@@ -11,11 +11,7 @@ const PokemonPage = async ({ params }: { params: { name: string } }) => {
     return;
   }
 
-  if (!result.data) {
-    return;
-  }
-
-  const { pokemon, evolutionChain } = result.data;
+  const { pokemon, evolutionChain } = result.data!;
 
   return (
     <div className="bg-slate-100 min-h-screen">
