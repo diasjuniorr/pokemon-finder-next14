@@ -5,6 +5,7 @@ import { SkeletonCard } from "../skeleton-card";
 import { usePokemonList } from "@/hooks/use-pokemon-list";
 import { PokemonCard } from "../pokemon-card";
 import { PokemonSearchBar } from "../pokemon-search-bar";
+import { PokemonDetailsErrorPage } from "@/app/pokemon/[name]/error-page";
 
 const PokemonDisplayList = ({ list }: { list: Pokemon[] }) => {
   const {
@@ -19,6 +20,10 @@ const PokemonDisplayList = ({ list }: { list: Pokemon[] }) => {
     handleTypeFilterChange,
     hasError,
   } = usePokemonList({ list, initialListSize: 30 });
+
+  if (hasError) {
+    return <PokemonDetailsErrorPage />;
+  }
 
   return (
     <div className="bg-slate-100 min-h-screen">
