@@ -1,7 +1,5 @@
 "use client";
 import _debounce from "lodash/debounce";
-import { ChangeEvent, useEffect, useState } from "react";
-import Link from "next/link";
 import { Pokemon } from "@/entities/pokemon";
 import { SkeletonCard } from "../skeleton-card";
 import { usePokemonList } from "@/hooks/use-pokemon-list";
