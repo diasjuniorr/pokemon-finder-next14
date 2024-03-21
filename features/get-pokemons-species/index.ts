@@ -1,8 +1,21 @@
 import { Pokemon, PokemonSpecies } from "@/entities/pokemon";
 
-export const fetchPokemonsData = async (
+export type ListPokemonDataResponse = [
+  ListPokemonDataFailureResponse,
+  ListPokemonDataSuccessResponse
+];
+
+export interface ListPokemonDataFailureResponse {
+  error: Error | null;
+  hasError: boolean;
+}
+export interface ListPokemonDataSuccessResponse {
+  data: PokemonSpecies[] | null;
+}
+
+export const listPokemonData = async (
   pokemons: Pokemon[]
-): Promise<PokemonSpecies[]> => {
+): Promise<ListPokemonDataResponse> => {
   const speciesResponsePromises = pokemons.map(async (pokemon) => {
     const pokemonResponse = await fetch(
       `https://pokeapi.co/api/v2/pokemon/${pokemon.name}`
@@ -30,5 +43,53 @@ export const fetchPokemonsData = async (
     };
   });
 
-  return await Promise.all(speciesResponsePromises);
+  const promisesResponse = await Promise.allSettled(speciesResponsePromises);
+
+  const [errorMapping, data] = mapPromiseResponses(promisesResponse);
+  if (errorMapping.hasError) {
+    return [errorMapping, data];
+  }
+
+  return [
+    {
+      error: null,
+      hasError: false,
+    },
+    data,
+  ];
+};
+
+const mapPromiseResponses = (
+  promisesResponse: PromiseSettledResult<PokemonSpecies>[]
+): [
+  { error: Error | null; hasError: boolean },
+  { data: PokemonSpecies[] | null }
+] => {
+  const hasError = promisesResponse.some(
+    (response) => response.status === "rejected"
+  );
+
+  if (hasError) {
+    return [
+      {
+        error: new Error("Failed to fetch data"),
+        hasError: true,
+      },
+      { data: null },
+    ];
+  }
+
+  const successResponse = promisesResponse.map(
+    (response) => (response as PromiseFulfilledResult<PokemonSpecies>).value
+  );
+
+  return [
+    {
+      error: null,
+      hasError: false,
+    },
+    {
+      data: successResponse,
+    },
+  ];
 };
