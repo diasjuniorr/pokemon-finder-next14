@@ -8,32 +8,6 @@ import { usePokemonList } from "@/hooks/use-pokemon-list";
 import { PokemonCard } from "../pokemon-card";
 import { PokemonSearchBar } from "../pokemon-search-bar";
 
-interface TextInputProps {
-  placeholder: string;
-  value: string;
-  onChange: (value: string) => void;
-}
-
-const TextInput: React.FC<TextInputProps> = ({
-  placeholder,
-  value,
-  onChange,
-}) => {
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    onChange(e.target.value);
-  };
-
-  return (
-    <input
-      type="text"
-      placeholder={placeholder}
-      value={value}
-      onChange={handleChange}
-      className="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring focus:border-blue-500"
-    />
-  );
-};
-
 const PokemonDisplayList = ({ list }: { list: Pokemon[] }) => {
   const {
     typeFilter,
