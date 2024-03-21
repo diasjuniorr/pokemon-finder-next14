@@ -3,6 +3,7 @@ import { PokemonDetailsCard } from "./components/pokemon-details-card";
 import { HabitatCard } from "./components/habitat-card";
 import { FunFactCard } from "./components/fun-fact-card";
 import { PokemonDetailsErrorPage } from "./error-page";
+import NavigateBack from "./components/navigate-back";
 
 const PokemonPage = async ({ params }: { params: { name: string } }) => {
   const { name } = params;
@@ -21,8 +22,8 @@ const PokemonPage = async ({ params }: { params: { name: string } }) => {
           {`${pokemon.name.charAt(0).toUpperCase()}${pokemon.name.slice(1)}`}{" "}
           Evolution Chain
         </h1>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-6 max-w-screen-lg ">
+        <NavigateBack />
+        <div className="mt-12 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-6 max-w-screen-lg ">
           {evolutionChain.map((evolution) => (
             <PokemonDetailsCard
               key={evolution.name}
