@@ -14,7 +14,7 @@ const SkeletonPage: React.FC = () => {
               key={index}
               className="p-4 rounded-lg shadow-md bg-white animate-pulse"
             >
-              <div className="h-60 w-52 bg-gray-300 mb-4 rounded"></div>
+              <div className="h-72 w-44 bg-gray-300 mb-4 rounded"></div>
               <div className="flex">
                 <div className="w-1/2 h-4 bg-gray-200 rounded-full mr-2"></div>
                 <div className="w-1/2 h-4 bg-gray-200 rounded-full"></div>
