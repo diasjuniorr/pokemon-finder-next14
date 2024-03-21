@@ -28,7 +28,6 @@ const PokemonPage = async ({ params }: { params: { name: string } }) => {
             <PokemonDetailsCard
               key={evolution.name}
               isSelected={evolution.name === pokemon.name}
-              pokemon={pokemon}
               evolution={evolution}
             />
           ))}

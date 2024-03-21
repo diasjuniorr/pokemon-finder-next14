@@ -4,11 +4,9 @@ import { PokemonSpecies, TColorsKeys, TYPE_COLORS } from "@/entities/pokemon";
 
 export const PokemonDetailsCard = ({
   isSelected,
-  pokemon,
   evolution,
 }: {
   isSelected: boolean;
-  pokemon: PokemonSpecies;
   evolution: PokemonSpecies;
 }) => {
   return (
@@ -16,7 +14,7 @@ export const PokemonDetailsCard = ({
       <div
         key={evolution.name}
         className={`${
-          TYPE_COLORS[pokemon.types[0] as TColorsKeys]
+          TYPE_COLORS[evolution.types[0] as TColorsKeys]
         } rounded-lg  shadow-md `}
       >
         <div className="p-4">
@@ -25,7 +23,7 @@ export const PokemonDetailsCard = ({
             <span className="text-gray-800">{evolution.generation}</span>
           </div>
           <div className="px-1 pb-2">
-            {pokemon.types.map((type) => {
+            {evolution.types.map((type) => {
               return (
                 <span
                   className="inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700 mr-2 mb-2"
