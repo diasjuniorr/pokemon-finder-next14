@@ -20,6 +20,8 @@ export const fetchPokemonsData = async (
       name: pokemon.name,
       imageUrl,
       types: pokemonData.types.map((type: any) => type.type.name),
+      habitat: speciesData.habitat.name,
+      funFacts: [],
       stats: pokemonData.stats.reduce((acc: any, curr: any) => {
         return { ...acc, [curr.stat.name]: curr.base_stat };
       }),

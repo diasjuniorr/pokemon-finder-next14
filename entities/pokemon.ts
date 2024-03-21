@@ -17,14 +17,23 @@ export interface PokemonSpecies {
   generation: string;
   types: string[];
   evolutionChainId: number;
+  habitat: string;
+  funFacts: PokemonFunFact[];
   stats: PokemonStats;
+}
+
+export interface PokemonFunFact {
+  flavor_text: string;
+  language: {
+    name: string;
+  };
 }
 
 interface PokemonStats {
   hp: number;
   attack: number;
   defense: number;
-  specialAttack: number;
-  specialDefense: number;
+  "special-attack": number;
+  "special-defense": number;
   speed: number;
 }
