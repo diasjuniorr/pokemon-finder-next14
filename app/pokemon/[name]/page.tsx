@@ -2,13 +2,14 @@ import { getPokemonEvolutions } from "@/features/get-pokemon-evolutions";
 import { PokemonDetailsCard } from "./components/pokemon-details-card";
 import { HabitatCard } from "./components/habitat-card";
 import { FunFactCard } from "./components/fun-fact-card";
+import { PokemonDetailsErrorPage } from "./error-page";
 
 const PokemonPage = async ({ params }: { params: { name: string } }) => {
   const { name } = params;
   const [error, result] = await getPokemonEvolutions(name);
 
   if (error.hasError) {
-    return;
+    return <PokemonDetailsErrorPage />;
   }
 
   const { pokemon, evolutionChain } = result.data!;
