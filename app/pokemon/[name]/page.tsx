@@ -5,7 +5,17 @@ import { FunFactCard } from "./components/fun-fact-card";
 
 const PokemonPage = async ({ params }: { params: { name: string } }) => {
   const { name } = params;
-  const { pokemon, evolutionChain } = await getPokemonEvolutions(name);
+  const [error, result] = await getPokemonEvolutions(name);
+
+  if (error.hasError) {
+    return;
+  }
+
+  if (!result.data) {
+    return;
+  }
+
+  const { pokemon, evolutionChain } = result.data;
 
   return (
     <div className="bg-slate-100 min-h-screen">
