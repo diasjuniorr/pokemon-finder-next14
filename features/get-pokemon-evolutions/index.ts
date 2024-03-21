@@ -114,7 +114,7 @@ const successResponse = (
     },
     {
       data: {
-        pokemon: pokemon,
+        pokemon,
         evolutionChain,
       },
     },
