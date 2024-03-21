@@ -20,6 +20,8 @@ export const getPokemonSpecies = async (
     generation: speciesData.generation.name,
     types: data.types.map((type: any) => type.type.name),
     evolutionChainId: speciesData.evolution_chain.url.split("/")[6],
+    habitat: speciesData.habitat ? speciesData.habitat.name : "unknown",
+    funFacts: speciesData.flavor_text_entries,
     stats: data.stats.reduce((acc: any, curr: any) => {
       return { ...acc, [curr.stat.name]: curr.base_stat };
     }),

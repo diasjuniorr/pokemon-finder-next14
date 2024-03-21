@@ -36,7 +36,7 @@ export function usePokemonList({
   const newPokemonList = useCallback(
     (list: Pokemon[], initialSize: number) => {
       setPokemonNames(list);
-      fetchPokemonsData(list.slice(0, initialSize)).then(
+      fetchPokemonsData(list.slice(0, initialListSize)).then(
         (data: PokemonSpecies[]) => {
           setInitialPokemonList(data);
           setFilteredPokemonList(data);
@@ -57,6 +57,7 @@ export function usePokemonList({
       setDisplayPokemonList,
       setGenerationList,
       setTypeList,
+      initialListSize,
     ]
   );
 

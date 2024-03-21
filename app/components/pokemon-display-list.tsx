@@ -7,6 +7,29 @@ import { Pokemon } from "@/entities/pokemon";
 import { SkeletonCard } from "./skeleton-card";
 import { usePokemonList } from "@/hooks/use-pokemon-list";
 
+const TYPE_COLORS = {
+  normal: "bg-[#EAE8E1]",
+  bug: "bg-[#BAC226]",
+  dark: "bg-[#756D63]",
+  dragon: "bg-[#A99FE9]",
+  electric: "bg-[#F4BE6E]",
+  fairy: "bg-[#F4CFF0]",
+  fighting: "bg-[#B27650]",
+  fire: "bg-[#FF7F70]",
+  flying: "bg-[#AFC7FF]",
+  ghost: "bg-[#A5A5C9]",
+  grass: "bg-[#9FD360]",
+  ground: "bg-[#D4B881]",
+  ice: "bg-[#C9F3FF]",
+  poison: "bg-[#B58DBF]",
+  psychic: "bg-[#F1A9C4]",
+  rock: "bg-[#93836C]",
+  steel: "bg-[#ABB4B8]",
+  water: "bg-[#72BBFF]",
+} as const;
+
+type TColorsKeys = keyof typeof TYPE_COLORS;
+
 interface TextInputProps {
   placeholder: string;
   value: string;
@@ -71,29 +94,57 @@ const PokemonDisplayList = ({ list }: { list: Pokemon[] }) => {
   } = usePokemonList({ list, initialListSize: 30 });
 
   return (
-    <div className="bg-gradient-to-br from-green-500 to-cyan-500 min-h-screen">
-      <div className="container mx-auto px-4">
-        <h1 className="text-2xl font-bold mb-4">Your Page Title</h1>
-        <div>
-          <label htmlFor="textInput" className="block mb-2">
-            Enter your text:
-          </label>
-          <TextInput
-            placeholder="Type something..."
-            value={searchTerm}
-            onChange={handleSearchTermChange}
-          />
+    <div className="bg-slate-100 min-h-screen">
+      <div className=" mx-auto px-10 w-fit">
+        <h1 className="text-2xl font-bold mb-4 pt-6">Pokemon Finder</h1>
+        {/* search bar component */}
+        <div className=" mx-auto flex gap-4 pb-6">
+          <div className="flex flex-1">
+            <div className="relative w-full">
+              <div className="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
+                <svg
+                  className="w-4 h-4 text-gray-500 dark:text-gray-400"
+                  aria-hidden="true"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 20 20"
+                >
+                  <path
+                    stroke="currentColor"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"
+                  />
+                </svg>
+              </div>
+              <input
+                type="search"
+                id="default-search"
+                className="block w-full p-4 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                placeholder="Search pokemons..."
+                value={searchTerm}
+                onChange={(e) => handleSearchTermChange(e.target.value)}
+                required
+              />
+            </div>
+          </div>
+
+          <div className="flex flex-1 gap-4">
+            <SelectComponent
+              options={generationList}
+              value={generationFilter}
+              onChange={handleGenerationFilterChange}
+            />
+            <SelectComponent
+              options={typeList}
+              value={typeFilter}
+              onChange={handleTypeFilterChange}
+            />
+          </div>
         </div>
-        <SelectComponent
-          options={generationList}
-          value={generationFilter}
-          onChange={handleGenerationFilterChange}
-        />
-        <SelectComponent
-          options={typeList}
-          value={typeFilter}
-          onChange={handleTypeFilterChange}
-        />
+        {/* ends here */}
+
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 max-w-screen-lg mx-auto">
           {displayPokemonList.length === 0
             ? Array.from({ length: 10 }).map((_, index) => (
@@ -103,35 +154,17 @@ const PokemonDisplayList = ({ list }: { list: Pokemon[] }) => {
                 <Link href={`/pokemon/${pokemon.name}`} key={pokemon.name}>
                   <div
                     key={pokemon.name}
-                    className="bg-white p-4 rounded-lg shadow-md"
+                    className={`${
+                      TYPE_COLORS[pokemon.types[0] as TColorsKeys]
+                    } p-4 rounded-lg shadow-md`}
                   >
                     <div className="flex justify-between items-center mb-4">
                       <h2 className="text-xl font-bold">{pokemon.name}</h2>
-                      <span className="text-gray-500">
+                      <span className="text-gray-800">
                         {pokemon.generation}
                       </span>
                     </div>
-                    <div className="flex justify-center">
-                      <Image
-                        src={pokemon.imageUrl}
-                        alt={pokemon.name}
-                        width={200}
-                        height={200}
-                        className="mx-auto"
-                      />
-                    </div>
-                    <div className="mt-4">
-                      <h3 className="text-lg font-semibold mb-2">Stats:</h3>
-                      <ul>
-                        <li>HP: {pokemon.stats.hp}</li>
-                        <li>Attack: {pokemon.stats.attack}</li>
-                        <li>Defense: {pokemon.stats.defense}</li>
-                        <li>Special Attack: {pokemon.stats.specialAttack}</li>
-                        <li>Special Defense: {pokemon.stats.specialDefense}</li>
-                        <li>Speed: {pokemon.stats.speed}</li>
-                      </ul>
-                    </div>
-                    <div className="px-1 pt-4 pb-2">
+                    <div className="px-1 pb-2">
                       {pokemon.types.map((type) => {
                         return (
                           <span
@@ -142,6 +175,15 @@ const PokemonDisplayList = ({ list }: { list: Pokemon[] }) => {
                           </span>
                         );
                       })}
+                    </div>
+                    <div className="flex justify-center">
+                      <Image
+                        src={pokemon.imageUrl}
+                        alt={pokemon.name}
+                        width={150}
+                        height={150}
+                        className="mx-auto"
+                      />
                     </div>
                   </div>
                 </Link>
