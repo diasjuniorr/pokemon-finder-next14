@@ -29,6 +29,18 @@ Then, run the development server:
 npm run dev
 ```
 
+To build the project run:
+
+```bash
+npm run build
+```
+
+To run the project in production mode run:
+
+```bash
+npm start
+```
+
 
 ## Usage <a name = "usage"></a>
 
