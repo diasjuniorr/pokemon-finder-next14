@@ -1,6 +1,26 @@
 import type { Config } from "tailwindcss";
 
 const config: Config = {
+  safelist: [
+    "bg-normal",
+    "bg-bug",
+    "bg-dark",
+    "bg-dragon",
+    "bg-electric",
+    "bg-fairy",
+    "bg-fighting",
+    "bg-fire",
+    "bg-flying",
+    "bg-ghost",
+    "bg-grass",
+    "bg-ground",
+    "bg-ice",
+    "bg-poison",
+    "bg-psychic",
+    "bg-rock",
+    "bg-steel",
+    "bg-water",
+  ],
   content: [
     "./pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./components/**/*.{js,ts,jsx,tsx,mdx}",
