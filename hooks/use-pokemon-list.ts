@@ -159,7 +159,7 @@ export function usePokemonList({
   ]);
 
   const handleSearchTermChange = (term: string) => {
-    setSearchTerm(term);
+    setSearchTerm(term.toLocaleLowerCase());
   };
 
   const handleGenerationFilterChange = (

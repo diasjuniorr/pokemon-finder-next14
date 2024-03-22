@@ -31,10 +31,10 @@ const PokemonDisplayList = ({ list }: { list: Pokemon[] }) => {
         <h1 className="text-2xl font-bold mb-4 pt-6">Pokemon Finder</h1>
         <PokemonSearchBar
           searchTerm={searchTerm}
+          handleSearchTermChange={handleSearchTermChange}
           generationFilter={generationFilter}
           generationList={generationList}
           handleGenerationFilterChange={handleGenerationFilterChange}
-          handleSearchTermChange={handleSearchTermChange}
           handleTypeFilterChange={handleTypeFilterChange}
           typeFilter={typeFilter}
           typeList={typeList}
