@@ -3,6 +3,7 @@ import {
   GetPokemonSpeciesResponse,
   getPokemonSpecies,
 } from "../get-pokemon-species";
+import { errorResponse, successResponse } from "@/shared/responses";
 
 type GetPokemonEvolutionChainResponse = [
   GetPokemonEvolutionChainFailureResponse,
@@ -10,7 +11,8 @@ type GetPokemonEvolutionChainResponse = [
 ];
 
 export interface GetPokemonEvolutionChainFailureResponse {
-  error: Error | null;
+  error?: Error;
+  code?: number;
   hasError: boolean;
 }
 export interface GetPokemonEvolutionChainSuccessResponse {
@@ -22,7 +24,7 @@ export const getPokemonEvolutionChain = async (
 ): Promise<GetPokemonEvolutionChainResponse> => {
   const [error, result] = await getPokemonSpecies(name);
   if (error.hasError) {
-    return errorResponse(error.error as Error);
+    return errorResponse(error.error as Error, error.code);
   }
 
   try {
@@ -31,6 +33,9 @@ export const getPokemonEvolutionChain = async (
         result.data!.evolutionChainId
       }`
     );
+    if (response.status == 404) {
+      return errorResponse(new Error("evolution chain not found"), 404);
+    }
     const data = await response.json();
 
     const pokemons: string[] = [data.chain.species.name];
@@ -46,17 +51,13 @@ export const getPokemonEvolutionChain = async (
       mapPokemonDataPromisesResponse(pokemonDataPromisesResponse);
 
     if (errorMappingResponse.hasError) {
-      return errorResponse(new Error("Error fetching pokemon data"));
+      return errorResponse(new Error("error fetching pokemon data"));
     }
 
-    return [
-      { error: null, hasError: false },
-      {
-        data: pokemonDataResult.data,
-      },
-    ];
+    return successResponse<PokemonSpecies[]>(pokemonDataResult.data);
   } catch (error) {
-    return errorResponse(new Error("Error fetching pokemon data"));
+    console.log("error fetching pokemon data");
+    return errorResponse(new Error("error fetching pokemon data"));
   }
 };
 
@@ -98,18 +99,6 @@ const mapPokemonDataPromisesResponse = (
       data: pokemonData.filter(
         (pokemon) => pokemon !== null
       ) as PokemonSpecies[],
-    },
-  ];
-};
-
-const errorResponse = (error: Error): GetPokemonEvolutionChainResponse => {
-  return [
-    {
-      error,
-      hasError: true,
-    },
-    {
-      data: null,
     },
   ];
 };

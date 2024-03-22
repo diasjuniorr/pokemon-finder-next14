@@ -1,13 +1,15 @@
 import { PokemonSpecies } from "@/entities/pokemon";
 import { GetPokemonDataResponse, getPokemonData } from "../get-pokemon-data";
 import { extractEvolutionsRecursively } from "../get-pokemon-evolution-chain";
+import { errorResponse, successResponse } from "@/shared/responses";
 
 export type GetPokemonEvolutionsResponse = [
   GetPokemonEvolutionsFailureResponse,
   GetPokemonEvolutionsSuccessResponse
 ];
 export interface GetPokemonEvolutionsFailureResponse {
-  error: Error | null;
+  error?: Error;
+  code?: number;
   hasError: boolean;
 }
 export interface GetPokemonEvolutionsSuccessResponse {
@@ -25,9 +27,9 @@ export const getPokemonEvolutions = async (
   const [error, result] = await getPokemonData({ name: name, url: "" });
 
   if (error.hasError) {
-    console.log("Error fetching pokemon data", error.error);
     return errorResponse(
-      error.error || new Error("fetching pokemon data failed")
+      error.error || new Error("fetching pokemon data failed"),
+      error.code
     );
   }
 
@@ -57,7 +59,10 @@ export const getPokemonEvolutions = async (
       return errorResponse(new Error("Error fetching evolution chain"));
     }
 
-    return successResponse(pokemon, evolutionChain.data);
+    return successResponse<PokemonEvolutionData>({
+      pokemon,
+      evolutionChain: evolutionChain.data,
+    });
   } catch (error) {
     return errorResponse(new Error("Error fetching evolution chain"));
   }
@@ -94,36 +99,6 @@ const mapEvolutionChainDataResponse = (
       data: evolutionChain.filter(
         (pokemon) => pokemon !== undefined
       ) as PokemonSpecies[],
-    },
-  ];
-};
-
-const successResponse = (
-  pokemon: PokemonSpecies,
-  evolutionChain: PokemonSpecies[]
-): GetPokemonEvolutionsResponse => {
-  return [
-    {
-      error: null,
-      hasError: false,
-    },
-    {
-      data: {
-        pokemon,
-        evolutionChain,
-      },
-    },
-  ];
-};
-
-const errorResponse = (error: Error): GetPokemonEvolutionsResponse => {
-  return [
-    {
-      error,
-      hasError: true,
-    },
-    {
-      data: null,
     },
   ];
 };

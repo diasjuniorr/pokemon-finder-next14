@@ -36,7 +36,7 @@ export function usePokemonList({
   } = usePokemonListStore();
 
   const newPokemonList = useCallback(
-    async (list: Pokemon[], initialSize: number) => {
+    async (list: Pokemon[]) => {
       setPokemonNames(list);
 
       const [error, result] = await listPokemonData(
@@ -66,8 +66,8 @@ export function usePokemonList({
       setDisplayPokemonList,
       setGenerationList,
       setTypeList,
-      initialListSize,
       setHasError,
+      initialListSize,
     ]
   );
 
@@ -185,7 +185,7 @@ export function usePokemonList({
   }, [filteredPokemonList, setGenerationList, setTypeList]);
 
   useEffect(() => {
-    newPokemonList(list, initialListSize);
+    newPokemonList(list);
   }, [list, newPokemonList, initialListSize]);
 
   useEffect(() => {
