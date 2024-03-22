@@ -5,7 +5,7 @@ import { SkeletonCard } from "../skeleton-card";
 import { usePokemonList } from "@/hooks/use-pokemon-list";
 import { PokemonCard } from "../pokemon-card";
 import { PokemonSearchBar } from "../pokemon-search-bar";
-import { PokemonDetailsErrorPage } from "@/app/pokemon/[name]/error-page";
+import { ErrorPage } from "@/shared/components/error-page";
 
 const PokemonDisplayList = ({ list }: { list: Pokemon[] }) => {
   const {
@@ -22,7 +22,7 @@ const PokemonDisplayList = ({ list }: { list: Pokemon[] }) => {
   } = usePokemonList({ list, initialListSize: 30 });
 
   if (hasError) {
-    return <PokemonDetailsErrorPage />;
+    return <ErrorPage />;
   }
 
   return (
