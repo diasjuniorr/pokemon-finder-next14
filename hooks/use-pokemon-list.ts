@@ -4,6 +4,7 @@ import { getPokemonEvolutionChain } from "@/features/get-pokemon-evolution-chain
 import { usePokemonListStore } from "@/store/pokemon-list-store";
 import { ChangeEvent, useCallback, useEffect } from "react";
 import { listPokemonData } from "@/features/get-pokemons-species";
+import { set } from "lodash";
 
 export function usePokemonList({
   list,
@@ -31,8 +32,8 @@ export function usePokemonList({
     typeList,
     searchTerm,
     setSearchTerm,
-    setHasError,
-    hasError,
+    setError,
+    error,
   } = usePokemonListStore();
 
   const newPokemonList = useCallback(
@@ -43,7 +44,7 @@ export function usePokemonList({
         list.slice(0, initialListSize)
       );
       if (error.hasError) {
-        setHasError(true);
+        setError(error);
         return;
       }
 
@@ -66,10 +67,15 @@ export function usePokemonList({
       setDisplayPokemonList,
       setGenerationList,
       setTypeList,
-      setHasError,
       initialListSize,
+      setError,
     ]
   );
+
+  const restartList = useCallback(async () => {
+    setError({ hasError: false });
+    setSearchTerm("");
+  }, []);
 
   const filterByPokemonName = useCallback(
     async (name: string) => {
@@ -84,6 +90,7 @@ export function usePokemonList({
       );
 
       if (!pokemonFound) {
+        setError({ hasError: true, code: 404 });
         setFilteredPokemonList([] as PokemonSpecies[]);
         setDisplayPokemonList([] as PokemonSpecies[]);
         return;
@@ -91,7 +98,7 @@ export function usePokemonList({
 
       const [error, result] = await getPokemonEvolutionChain(pokemonFound.name);
       if (error.hasError) {
-        setHasError(true);
+        setError(error);
         return;
       }
 
@@ -103,7 +110,7 @@ export function usePokemonList({
       pokemonNames,
       setDisplayPokemonList,
       setFilteredPokemonList,
-      setHasError,
+      setError,
     ]
   );
 
@@ -159,6 +166,7 @@ export function usePokemonList({
   ]);
 
   const handleSearchTermChange = (term: string) => {
+    setError({ hasError: false });
     setSearchTerm(term.toLocaleLowerCase());
   };
 
@@ -232,7 +240,8 @@ export function usePokemonList({
     handleSearchTermChange,
     handleGenerationFilterChange,
     handleTypeFilterChange,
-    hasError,
+    error,
+    restartList,
   };
 }
 

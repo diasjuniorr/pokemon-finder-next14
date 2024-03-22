@@ -1,4 +1,5 @@
 import { Pokemon, PokemonSpecies } from "@/entities/pokemon";
+import { ErrorResponse } from "@/shared/responses";
 import { create } from "zustand";
 import { devtools, persist } from "zustand/middleware";
 
@@ -12,7 +13,7 @@ export type TPokemonListState = {
   generationList: string[];
   typeFilter: string;
   generationFilter: string;
-  hasError: boolean;
+  error: ErrorResponse;
 };
 
 export type TPokemonListActions = {
@@ -25,7 +26,7 @@ export type TPokemonListActions = {
   setTypeFilter: (type: string) => void;
   setGenerationFilter: (generation: string) => void;
   setSearchTerm: (term: string) => void;
-  setHasError: (error: boolean) => void;
+  setError: (error: ErrorResponse) => void;
 };
 
 export const usePokemonListStore = create<
@@ -53,8 +54,10 @@ export const usePokemonListStore = create<
         generationList: [] as string[],
         typeFilter: "",
         generationFilter: "",
-        hasError: false,
-        setHasError: (error) => set({ hasError: error }),
+        error: {
+          hasError: false,
+        },
+        setError: (error) => set({ error }),
         setPokemonNames: (list) => set({ pokemonNames: list }),
         setFilteredPokemonList: (list) => set({ filteredPokemonList: list }),
         setTypeList: (list) => set({ typeList: list }),

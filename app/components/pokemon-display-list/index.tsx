@@ -6,6 +6,7 @@ import { usePokemonList } from "@/hooks/use-pokemon-list";
 import { PokemonCard } from "../pokemon-card";
 import { PokemonSearchBar } from "../pokemon-search-bar";
 import { ErrorPage } from "@/shared/components/error-page";
+import { PokemonNotFound } from "@/app/pokemon/[name]/components/pokemon-not-found";
 
 const PokemonDisplayList = ({ list }: { list: Pokemon[] }) => {
   const {
@@ -18,10 +19,11 @@ const PokemonDisplayList = ({ list }: { list: Pokemon[] }) => {
     handleSearchTermChange,
     handleGenerationFilterChange,
     handleTypeFilterChange,
-    hasError,
+    error,
+    restartList,
   } = usePokemonList({ list, initialListSize: 30 });
 
-  if (hasError) {
+  if (error.hasError && error.code !== 404) {
     return <ErrorPage />;
   }
 
@@ -39,8 +41,9 @@ const PokemonDisplayList = ({ list }: { list: Pokemon[] }) => {
           typeFilter={typeFilter}
           typeList={typeList}
         />
+        {error.hasError && error.code === 404 && <PokemonNotFound />}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 max-w-screen-lg mx-auto">
-          {displayPokemonList.length === 0
+          {!error.hasError && displayPokemonList.length === 0
             ? Array.from({ length: 10 }).map((_, index) => (
                 <SkeletonCard key={index} />
               ))
