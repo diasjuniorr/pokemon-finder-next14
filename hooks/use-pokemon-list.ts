@@ -3,7 +3,7 @@ import { Pokemon, PokemonSpecies } from "@/entities/pokemon";
 import { getPokemonEvolutionChain } from "@/features/get-pokemon-evolution-chain";
 import { usePokemonListStore } from "@/store/pokemon-list-store";
 import { ChangeEvent, useCallback, useEffect } from "react";
-import { listPokemonData } from "@/features/get-pokemons-species";
+import { listPokemonSpecies } from "@/features/list-pokemon-species";
 
 export function usePokemonList({
   list,
@@ -39,7 +39,7 @@ export function usePokemonList({
     async (list: Pokemon[]) => {
       setPokemonNames(list);
 
-      const [error, result] = await listPokemonData(
+      const [error, result] = await listPokemonSpecies(
         list.slice(0, initialListSize)
       );
       if (error.hasError) {

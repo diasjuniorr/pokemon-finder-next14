@@ -20,7 +20,7 @@ export interface ListPokemonDataSuccessResponse {
   data: PokemonSpecies[] | null;
 }
 
-export const listPokemonData = async (
+export const listPokemonSpecies = async (
   pokemons: Pokemon[]
 ): Promise<ListPokemonDataResponse> => {
   const speciesResponsePromises = pokemons.map(async (pokemon) => {
@@ -48,6 +48,7 @@ export const listPokemonData = async (
     const imageUrl = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${id}.png`;
 
     return successResponse<PokemonSpecies>({
+      id: id,
       name: pokemon.name,
       imageUrl,
       types: pokemonData.types.map((type: any) => type.type.name),
