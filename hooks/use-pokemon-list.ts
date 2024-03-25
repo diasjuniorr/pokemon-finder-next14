@@ -4,7 +4,6 @@ import { getPokemonEvolutionChain } from "@/features/get-pokemon-evolution-chain
 import { usePokemonListStore } from "@/store/pokemon-list-store";
 import { ChangeEvent, useCallback, useEffect } from "react";
 import { listPokemonData } from "@/features/get-pokemons-species";
-import { set } from "lodash";
 
 export function usePokemonList({
   list,

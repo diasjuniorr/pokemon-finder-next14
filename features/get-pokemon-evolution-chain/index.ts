@@ -1,8 +1,5 @@
 import { PokemonSpecies } from "@/entities/pokemon";
-import {
-  GetPokemonSpeciesResponse,
-  getPokemonSpecies,
-} from "../get-pokemon-species";
+import { GetPokemonSpeciesResponse } from "../get-pokemon-species";
 import { errorResponse, successResponse } from "@/shared/responses";
 
 type GetPokemonEvolutionChainResponse = [
@@ -22,27 +19,30 @@ export interface GetPokemonEvolutionChainSuccessResponse {
 export const getPokemonEvolutionChain = async (
   name: string
 ): Promise<GetPokemonEvolutionChainResponse> => {
-  const [error, result] = await getPokemonSpecies(name);
-  if (error.hasError) {
-    return errorResponse(error.error as Error, error.code);
-  }
-
   try {
-    const response = await fetch(
-      `https://pokeapi.co/api/v2/evolution-chain/${
-        result.data!.evolutionChainId
-      }`
+    const speciesResponse = await fetch(
+      `https://pokeapi.co/api/v2/pokemon-species/${name}`
     );
+
+    if (speciesResponse.status === 404) {
+      return errorResponse(new Error("Pokemon species not found"), 404);
+    }
+
+    const speciesData = await speciesResponse.json();
+
+    const response = await fetch(speciesData.evolution_chain.url);
+
     if (response.status == 404) {
       return errorResponse(new Error("evolution chain not found"), 404);
     }
+
     const data = await response.json();
 
     const pokemons: string[] = [data.chain.species.name];
     pokemons.push(...extractEvolutionsRecursively(data.chain));
 
     const pokemonDataPromises = pokemons.map(async (pokemon) => {
-      return getPokemonSpecies(pokemon);
+      return getPokemonData(pokemon);
     });
 
     const pokemonDataPromisesResponse = await Promise.all(pokemonDataPromises);
@@ -54,7 +54,9 @@ export const getPokemonEvolutionChain = async (
       return errorResponse(new Error("error fetching pokemon data"));
     }
 
-    return successResponse<PokemonSpecies[]>(pokemonDataResult.data);
+    const evolutionChain = [...pokemonDataResult.data];
+
+    return successResponse<PokemonSpecies[]>(evolutionChain);
   } catch (error) {
     console.log("error fetching pokemon data");
     return errorResponse(new Error("error fetching pokemon data"));
@@ -67,6 +69,49 @@ type MapPokemonDataPromisesResponse = [
     data: PokemonSpecies[];
   }
 ];
+
+const getPokemonData = async (name: string) => {
+  try {
+    const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${name}`);
+
+    if (response.status === 404) {
+      return errorResponse(new Error("Pokemon not found"), 404);
+    }
+
+    const data = await response.json();
+
+    const speciesResponse = await fetch(
+      `https://pokeapi.co/api/v2/pokemon-species/${name}`
+    );
+
+    if (speciesResponse.status === 404) {
+      return errorResponse(new Error("Pokemon species not found"), 404);
+    }
+
+    const speciesData = await speciesResponse.json();
+
+    const imageUrl = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${data.id}.png`;
+
+    const pokemonData = {
+      id: data.id,
+      name: data.name,
+      imageUrl: imageUrl,
+      generation: speciesData.generation.name,
+      types: data.types.map((type: any) => type.type.name),
+      evolutionChainId: speciesData.evolution_chain.url.split("/")[6],
+      habitat: speciesData.habitat ? speciesData.habitat.name : "unknown",
+      funFacts: speciesData.flavor_text_entries,
+      stats: data.stats.reduce((acc: any, curr: any) => {
+        return { ...acc, [curr.stat.name]: curr.base_stat };
+      }),
+    };
+
+    return successResponse<PokemonSpecies>(pokemonData);
+  } catch (error) {
+    console.log("Error fetching pokemon data", error);
+    return errorResponse(new Error("Error fetching pokemon data"));
+  }
+};
 
 const mapPokemonDataPromisesResponse = (
   items: GetPokemonSpeciesResponse[]
