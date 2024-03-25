@@ -43,6 +43,7 @@ export const getPokemonData = async (
     const imageUrl = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${data.id}.png`;
 
     return successResponse<PokemonSpecies>({
+      id: data.id,
       name: data.name,
       imageUrl: imageUrl,
       generation: speciesData.generation.name,

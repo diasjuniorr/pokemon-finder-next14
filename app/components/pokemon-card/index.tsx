@@ -3,7 +3,6 @@ import Image from "next/image";
 import { PokemonSpecies, TColorsKeys, TYPE_COLORS } from "@/entities/pokemon";
 
 export const PokemonCard = ({ pokemon }: { pokemon: PokemonSpecies }) => {
-  console.log("debug", pokemon);
   return (
     <Link href={`/pokemon/${pokemon.name}`} key={pokemon.name}>
       <div

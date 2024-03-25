@@ -12,6 +12,7 @@ export interface PokemonData {
 }
 
 export interface PokemonSpecies {
+  id: number;
   name: string;
   imageUrl: string;
   generation: string;
