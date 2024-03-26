@@ -7,7 +7,6 @@ import { PokemonCard } from "../pokemon-card";
 import { PokemonSearchBar } from "../pokemon-search-bar";
 import { ErrorPage } from "@/shared/components/error-page";
 import { PokemonNotFound } from "@/app/pokemon/[name]/components/pokemon-not-found";
-import { useSearchParams } from "next/navigation";
 
 const PokemonDisplayList = ({ list }: { list: Pokemon[] }) => {
   const {
