@@ -6,23 +6,23 @@ import {
   successResponse,
 } from "@/shared/responses";
 
-export type ListPokemonDataResponse = [
-  ListPokemonDataFailureResponse,
-  ListPokemonDataSuccessResponse
+export type ListPokemonSpeciesResponse = [
+  ListPokemonSpeciesFailureResponse,
+  ListPokemonSpeciesSuccessResponse
 ];
 
-export interface ListPokemonDataFailureResponse {
+export interface ListPokemonSpeciesFailureResponse {
   error?: Error;
   code?: number;
   hasError: boolean;
 }
-export interface ListPokemonDataSuccessResponse {
+export interface ListPokemonSpeciesSuccessResponse {
   data: PokemonSpecies[] | null;
 }
 
 export const listPokemonSpecies = async (
   pokemons: Pokemon[]
-): Promise<ListPokemonDataResponse> => {
+): Promise<ListPokemonSpeciesResponse> => {
   const speciesResponsePromises = pokemons.map(async (pokemon) => {
     const pokemonResponse = await fetch(
       `https://pokeapi.co/api/v2/pokemon/${pokemon.name}`
