@@ -2,7 +2,7 @@ import Image from "next/image";
 
 export const PokemonNotFound = () => {
   return (
-    <div className="grid h-screen place-content-center  px-4">
+    <div className="container flex justify-center items-center w-full px-4 max-w-screen-lg">
       <div className="text-center">
         <Image
           src="/togepi-error.png"

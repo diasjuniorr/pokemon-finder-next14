@@ -38,7 +38,7 @@ export const ErrorPage = ({
           className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
           onClick={handleTryAgain}
         >
-          Try again
+          Go back to home
         </button>
       </div>
     </div>

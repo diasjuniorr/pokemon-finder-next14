@@ -29,7 +29,7 @@ const PokemonDisplayList = ({ list }: { list: Pokemon[] }) => {
 
   return (
     <div className="bg-slate-100 min-h-screen">
-      <div className=" mx-auto px-10 w-fit">
+      <div className=" mx-auto px-10 w-[836px]">
         <h1 className="text-2xl font-bold mb-4 pt-6">Pokemon Finder</h1>
         <PokemonSearchBar
           searchTerm={searchTerm}
