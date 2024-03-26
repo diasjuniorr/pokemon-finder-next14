@@ -1,7 +1,7 @@
+import NavigateBack from "./components/navigate-back";
 import { PokemonDetailsCard } from "./components/pokemon-details-card";
 import { HabitatCard } from "./components/habitat-card";
 import { FunFactCard } from "./components/fun-fact-card";
-import NavigateBack from "./components/navigate-back";
 import { ErrorPage } from "@/shared/components/error-page";
 import { getPokemonEvolutionChain } from "@/features/get-pokemon-evolution-chain";
 
@@ -10,7 +10,11 @@ const PokemonPage = async ({ params }: { params: { name: string } }) => {
   const [error, result] = await getPokemonEvolutionChain(name);
 
   if (error.hasError) {
-    return <ErrorPage />;
+    const msg =
+      error.code === 404
+        ? `We could not find ${name.toLocaleUpperCase()} in our pokedex.`
+        : "Oops... it looks like something went wrong.";
+    return <ErrorPage msg={msg} />;
   }
 
   const { data } = result;
