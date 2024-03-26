@@ -7,7 +7,7 @@ export const ErrorPage = ({
   callback,
 }: {
   msg?: string;
-  callback: () => void;
+  callback?: () => void;
 }) => {
   const router = useRouter();
 
