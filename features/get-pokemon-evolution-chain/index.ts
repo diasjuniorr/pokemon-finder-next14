@@ -95,7 +95,7 @@ const getPokemonData = async (name: string) => {
     const pokemonData = {
       id: data.id,
       name: data.name,
-      imageUrl: imageUrl,
+      imageUrl,
       generation: speciesData.generation.name,
       types: data.types.map((type: any) => type.type.name),
       evolutionChainId: speciesData.evolution_chain.url.split("/")[6],
