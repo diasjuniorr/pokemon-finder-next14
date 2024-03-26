@@ -10,7 +10,6 @@ import { PokemonNotFound } from "@/app/pokemon/[name]/components/pokemon-not-fou
 import { useSearchParams } from "next/navigation";
 
 const PokemonDisplayList = ({ list }: { list: Pokemon[] }) => {
-  const params = useSearchParams();
   const {
     typeFilter,
     typeList,
