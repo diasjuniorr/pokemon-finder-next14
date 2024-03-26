@@ -18,9 +18,11 @@ export const PokemonDetailsCard = ({
         } rounded-lg  shadow-md `}
       >
         <div className="p-4">
-          <div className="flex justify-between items-center mb-4">
+          <div className="flex justify-between flex-col mb-4">
             <h2 className="text-xl font-bold">{evolution.name}</h2>
-            <span className="text-gray-800">{evolution.generation}</span>
+            <span className="text-gray-800 text-sm">
+              {evolution.generation}
+            </span>
           </div>
           <div className="px-1 pb-2">
             {evolution.types.map((type) => {
