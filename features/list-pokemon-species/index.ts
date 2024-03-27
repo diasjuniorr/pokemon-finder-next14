@@ -1,4 +1,5 @@
 import { Pokemon, PokemonSpecies } from "@/entities/pokemon";
+import { newPokemonSpecies } from "@/shared/factories/pokemon-species";
 import {
   ErrorResponse,
   SuccessResponse,
@@ -44,22 +45,9 @@ export const listPokemonSpecies = async (
 
     const speciesData = await result.json();
 
-    const id = pokemonData.id;
-    const imageUrl = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${id}.png`;
-
-    return successResponse<PokemonSpecies>({
-      id: id,
-      name: pokemon.name,
-      imageUrl,
-      types: pokemonData.types.map((type: any) => type.type.name),
-      habitat: speciesData.habitat.name,
-      funFacts: [],
-      stats: pokemonData.stats.reduce((acc: any, curr: any) => {
-        return { ...acc, [curr.stat.name]: curr.base_stat };
-      }),
-      generation: speciesData.generation.name,
-      evolutionChainId: speciesData.evolution_chain.url.split("/")[6],
-    });
+    return successResponse<PokemonSpecies>(
+      newPokemonSpecies(pokemonData, speciesData)
+    );
   });
 
   const promisesResponse = await Promise.allSettled(speciesResponsePromises);

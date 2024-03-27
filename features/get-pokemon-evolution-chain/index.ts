@@ -11,6 +11,7 @@ import {
   PokemonEvolutionChainDTO,
   PokemonSpeciesDataDTO,
 } from "@/shared/clients/http-fetcher/dto";
+import { newPokemonSpecies } from "@/shared/factories/pokemon-species";
 
 type GetPokemonEvolutionChainResponse = [
   ErrorResponse,
@@ -90,23 +91,7 @@ const getPokemonData = async (name: string) => {
 
   const speciesData = pokemonSpeciesDataResult.data!;
 
-  const imageUrl = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${data.id}.png`;
-
-  const pokemonData = {
-    id: data.id,
-    name: data.name,
-    imageUrl,
-    generation: speciesData.generation.name,
-    types: data.types.map((type: any) => type.type.name),
-    evolutionChainId: speciesData.evolution_chain.url.split("/")[6],
-    habitat: speciesData.habitat ? speciesData.habitat.name : "unknown",
-    funFacts: speciesData.flavor_text_entries,
-    stats: data.stats.reduce((acc: any, curr: any) => {
-      return { ...acc, [curr.stat.name]: curr.base_stat };
-    }, {}),
-  };
-
-  return successResponse<PokemonSpecies>(pokemonData);
+  return successResponse<PokemonSpecies>(newPokemonSpecies(data, speciesData));
 };
 
 const mapPokemonDataPromisesResponse = (
