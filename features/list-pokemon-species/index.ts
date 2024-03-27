@@ -1,22 +1,22 @@
 import { Pokemon, PokemonSpecies } from "@/entities/pokemon";
+import { fetchJson } from "@/shared/clients/http-fetcher";
+import {
+  PokemonDataDTO,
+  PokemonSpeciesDataDTO,
+} from "@/shared/clients/http-fetcher/dto";
 import { newPokemonSpecies } from "@/shared/factories/pokemon-species";
 import {
   ErrorResponse,
-  SuccessResponse,
   errorResponse,
   successResponse,
 } from "@/shared/responses";
+import { GetPokemonSpeciesResponse } from "../get-pokemon-species";
 
 export type ListPokemonSpeciesResponse = [
-  ListPokemonSpeciesFailureResponse,
+  ErrorResponse,
   ListPokemonSpeciesSuccessResponse
 ];
 
-export interface ListPokemonSpeciesFailureResponse {
-  error?: Error;
-  code?: number;
-  hasError: boolean;
-}
 export interface ListPokemonSpeciesSuccessResponse {
   data: PokemonSpecies[] | null;
 }
@@ -24,81 +24,87 @@ export interface ListPokemonSpeciesSuccessResponse {
 export const listPokemonSpecies = async (
   pokemons: Pokemon[]
 ): Promise<ListPokemonSpeciesResponse> => {
-  const speciesResponsePromises = pokemons.map(async (pokemon) => {
-    const pokemonResponse = await fetch(
+  const speciesResponsePromises = createGetPokemonSpeciesPromises(pokemons);
+
+  const promisesResponse = await Promise.all(speciesResponsePromises);
+
+  const [errorMapping, response] =
+    mapPokemonDataPromisesResponse(promisesResponse);
+
+  if (errorMapping.hasError) {
+    return errorResponse(
+      (errorMapping.error as Error) || new Error("Failed to fetch data")
+    );
+  }
+
+  return successResponse<PokemonSpecies[]>(response.data);
+};
+
+const createGetPokemonSpeciesPromises = (pokemons: Pokemon[]) => {
+  return pokemons.map(async (pokemon) => {
+    const [error, pokemonDataResult] = await fetchJson<PokemonDataDTO>(
       `https://pokeapi.co/api/v2/pokemon/${pokemon.name}`
     );
-
-    if (pokemonResponse.status === 404) {
-      return errorResponse(new Error("Pokemon not found"), 404);
+    if (error.hasError) {
+      return errorResponse(error.error!, error.code);
     }
 
-    const pokemonData = await pokemonResponse.json();
+    const pokemonData = pokemonDataResult.data!;
 
-    const result = await fetch(
-      `https://pokeapi.co/api/v2/pokemon-species/${pokemon.name}`
-    );
-
-    if (result.status === 404) {
-      return errorResponse(new Error("Pokemon species not found"), 404);
+    const [errorSpecies, pokemonSpeciesResult] =
+      await fetchJson<PokemonSpeciesDataDTO>(
+        `https://pokeapi.co/api/v2/pokemon-species/${pokemon.name}`
+      );
+    if (errorSpecies.hasError) {
+      return errorResponse(errorSpecies.error!, errorSpecies.code);
     }
 
-    const speciesData = await result.json();
+    const speciesData = pokemonSpeciesResult.data!;
 
     return successResponse<PokemonSpecies>(
       newPokemonSpecies(pokemonData, speciesData)
     );
   });
-
-  const promisesResponse = await Promise.allSettled(speciesResponsePromises);
-
-  const [errorMapping, response] = mapPromiseResponses(
-    promisesResponse as PromiseSettledResult<
-      [ErrorResponse, SuccessResponse<PokemonSpecies>]
-    >[]
-  );
-
-  if (errorMapping.hasError) {
-    return errorResponse(
-      (errorMapping.error as Error) || new Error("Failed to fetch data"),
-      errorMapping.code
-    );
-  }
-
-  return successResponse(response.data);
 };
 
-const mapPromiseResponses = (
-  promisesResponse: PromiseSettledResult<
-    [ErrorResponse, SuccessResponse<PokemonSpecies>]
-  >[]
-): [
-  { error?: Error; code?: number; hasError: boolean },
-  { data: PokemonSpecies[] | null }
-] => {
-  const hasError = promisesResponse.some(
-    (response) => response.status === "rejected"
-  );
+type MapPokemonDataPromisesResponse = [
+  { error: Error | null; hasError: boolean },
+  {
+    data: PokemonSpecies[];
+  }
+];
 
-  if (hasError) {
-    return errorResponse(new Error("Failed to fetch data"));
+const mapPokemonDataPromisesResponse = (
+  items: GetPokemonSpeciesResponse[]
+): MapPokemonDataPromisesResponse => {
+  const errors: Error[] = [];
+
+  const pokemonData = items.map((response) => {
+    if (response[0].hasError) {
+      errors.push(
+        response[0].error || new Error("fetching pokemon data failed")
+      );
+      return null;
+    }
+
+    if (!response[1].data) {
+      errors.push(new Error("No data found for pokemon"));
+      return null;
+    }
+
+    return response[1].data;
+  });
+
+  if (errors.length > 0) {
+    return [{ error: errors[0], hasError: true }, { data: [] }];
   }
 
-  const response = promisesResponse.map(
-    (response) =>
-      (
-        response as unknown as PromiseFulfilledResult<
-          [ErrorResponse, SuccessResponse<PokemonSpecies>]
-        >
-      ).value
-  );
-
   return [
+    { error: null, hasError: false },
     {
-      hasError: false,
-    },
-    {
-      data: response.map((r) => r[1].data!),
+      data: pokemonData.filter(
+        (pokemon) => pokemon !== null
+      ) as PokemonSpecies[],
     },
   ];
 };
