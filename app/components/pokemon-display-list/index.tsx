@@ -24,7 +24,7 @@ const PokemonDisplayList = ({ list }: { list: Pokemon[] }) => {
   } = usePokemonList({ list, initialListSize: 30 });
 
   if (error.hasError && error.code !== 404) {
-    return <ErrorPage callback={() => restartList} />;
+    return <ErrorPage callback={() => restartList()} />;
   }
 
   return (
