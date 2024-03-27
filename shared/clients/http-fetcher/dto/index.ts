@@ -14,3 +14,14 @@ export interface PokemonDataDTO {
   types: { type: { name: string } }[];
   stats: { base_stat: number; stat: { name: string } }[];
 }
+
+export interface PokemonEvolutionChainDTO {
+  chain: Chain;
+}
+
+interface Chain {
+  species: {
+    name: string;
+  };
+  evolves_to: Chain[];
+}
