@@ -1,15 +1,21 @@
 import { PokemonSpecies } from "@/entities/pokemon";
-import { errorResponse, successResponse } from "@/shared/responses";
+import { fetchJson } from "@/shared/clients/http-fetcher";
+import {
+  PokemonDataDTO,
+  PokemonSpeciesDataDTO,
+} from "@/shared/clients/http-fetcher/dto";
+import { newPokemonSpecies } from "@/shared/factories/pokemon-species";
+import {
+  ErrorResponse,
+  errorResponse,
+  successResponse,
+} from "@/shared/responses";
 
 export type GetPokemonSpeciesResponse = [
-  GetPokemonSpeciesFailureResponse,
+  ErrorResponse,
   GetPokemonSpeciesSuccessResponse
 ];
-export interface GetPokemonSpeciesFailureResponse {
-  error?: Error;
-  code?: number;
-  hasError: boolean;
-}
+
 export interface GetPokemonSpeciesSuccessResponse {
   data: PokemonSpecies | null;
 }
@@ -17,44 +23,27 @@ export interface GetPokemonSpeciesSuccessResponse {
 export const getPokemonSpecies = async (
   pokemonName: string
 ): Promise<GetPokemonSpeciesResponse> => {
-  try {
-    const response = await fetch(
-      `https://pokeapi.co/api/v2/pokemon/${pokemonName}`
-    );
+  const [error, pokemonDataResult] = await fetchJson<PokemonDataDTO>(
+    `https://pokeapi.co/api/v2/pokemon/${pokemonName}`
+  );
+  if (error.hasError) {
+    return errorResponse(error.error!, error.code);
+  }
 
-    if (response.status === 404) {
-      return errorResponse(new Error("Pokemon not found"), 404);
-    }
+  const data = pokemonDataResult.data!;
 
-    const data = await response.json();
-
-    const speciesResponse = await fetch(
+  const [errorFetchingSpeciesData, pokemonSpeciesDataResult] =
+    await fetchJson<PokemonSpeciesDataDTO>(
       `https://pokeapi.co/api/v2/pokemon-species/${pokemonName}`
     );
-
-    if (speciesResponse.status === 404) {
-      return errorResponse(new Error("Pokemon species not found"), 404);
-    }
-
-    const speciesData = await speciesResponse.json();
-
-    const imageUrl = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${data.id}.png`;
-
-    return successResponse<PokemonSpecies>({
-      id: data.id,
-      name: data.name,
-      imageUrl: imageUrl,
-      generation: speciesData.generation.name,
-      types: data.types.map((type: any) => type.type.name),
-      evolutionChainId: speciesData.evolution_chain.url.split("/")[6],
-      habitat: speciesData.habitat ? speciesData.habitat.name : "unknown",
-      funFacts: speciesData.flavor_text_entries,
-      stats: data.stats.reduce((acc: any, curr: any) => {
-        return { ...acc, [curr.stat.name]: curr.base_stat };
-      }),
-    });
-  } catch (error) {
-    console.log("Error fetching pokemon data", error);
-    return errorResponse(new Error("Error fetching pokemon data"));
+  if (errorFetchingSpeciesData.hasError) {
+    return errorResponse(
+      errorFetchingSpeciesData.error!,
+      errorFetchingSpeciesData.code
+    );
   }
+
+  const speciesData = pokemonSpeciesDataResult.data!;
+
+  return successResponse<PokemonSpecies>(newPokemonSpecies(data, speciesData));
 };

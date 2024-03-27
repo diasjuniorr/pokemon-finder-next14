@@ -17,7 +17,7 @@ export interface PokemonSpecies {
   imageUrl: string;
   generation: string;
   types: string[];
-  evolutionChainId: number;
+  evolutionChainId: string;
   habitat: string;
   funFacts: PokemonFunFact[];
   stats: PokemonStats;

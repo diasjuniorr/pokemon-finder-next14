@@ -11,9 +11,9 @@ export const PokemonCard = ({ pokemon }: { pokemon: PokemonSpecies }) => {
           TYPE_COLORS[pokemon.types[0] as TColorsKeys]
         } p-4 rounded-lg shadow-md`}
       >
-        <div className="flex justify-between items-center mb-4">
+        <div className="flex justify-between  flex-col mb-4">
           <h2 className="text-xl font-bold">{pokemon.name}</h2>
-          <span className="text-gray-800">{pokemon.generation}</span>
+          <span className="text-gray-800 text-sm">{pokemon.generation}</span>
         </div>
         <div className="px-1 pb-2">
           {pokemon.types.map((type) => {

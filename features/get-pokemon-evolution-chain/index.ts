@@ -1,17 +1,23 @@
 import { PokemonSpecies } from "@/entities/pokemon";
 import { GetPokemonSpeciesResponse } from "../get-pokemon-species";
-import { errorResponse, successResponse } from "@/shared/responses";
+import {
+  ErrorResponse,
+  errorResponse,
+  successResponse,
+} from "@/shared/responses";
+import { fetchJson } from "@/shared/clients/http-fetcher";
+import {
+  PokemonDataDTO,
+  PokemonEvolutionChainDTO,
+  PokemonSpeciesDataDTO,
+} from "@/shared/clients/http-fetcher/dto";
+import { newPokemonSpecies } from "@/shared/factories/pokemon-species";
 
 type GetPokemonEvolutionChainResponse = [
-  GetPokemonEvolutionChainFailureResponse,
+  ErrorResponse,
   GetPokemonEvolutionChainSuccessResponse
 ];
 
-export interface GetPokemonEvolutionChainFailureResponse {
-  error?: Error;
-  code?: number;
-  hasError: boolean;
-}
 export interface GetPokemonEvolutionChainSuccessResponse {
   data: PokemonSpecies[] | null;
 }
@@ -19,48 +25,43 @@ export interface GetPokemonEvolutionChainSuccessResponse {
 export const getPokemonEvolutionChain = async (
   name: string
 ): Promise<GetPokemonEvolutionChainResponse> => {
-  try {
-    const speciesResponse = await fetch(
+  const [error, pokemonSpeciesDataResult] =
+    await fetchJson<PokemonSpeciesDataDTO>(
       `https://pokeapi.co/api/v2/pokemon-species/${name}`
     );
+  if (error.hasError) {
+    return errorResponse(error.error!, error.code);
+  }
 
-    if (speciesResponse.status === 404) {
-      return errorResponse(new Error("Pokemon species not found"), 404);
-    }
+  const speciesData = pokemonSpeciesDataResult.data!;
 
-    const speciesData = await speciesResponse.json();
+  const [errorChain, pokemonEvolutionChainResult] =
+    await fetchJson<PokemonEvolutionChainDTO>(speciesData.evolution_chain.url);
+  if (errorChain.hasError) {
+    return errorResponse(errorChain.error!, errorChain.code);
+  }
 
-    const response = await fetch(speciesData.evolution_chain.url);
+  const data = pokemonEvolutionChainResult.data!;
 
-    if (response.status == 404) {
-      return errorResponse(new Error("evolution chain not found"), 404);
-    }
+  const pokemons: string[] = [data.chain.species.name];
+  pokemons.push(...extractEvolutionsRecursively(data.chain));
 
-    const data = await response.json();
+  const pokemonDataPromises = pokemons.map(async (pokemon) => {
+    return getPokemonData(pokemon);
+  });
 
-    const pokemons: string[] = [data.chain.species.name];
-    pokemons.push(...extractEvolutionsRecursively(data.chain));
+  const pokemonDataPromisesResponse = await Promise.all(pokemonDataPromises);
 
-    const pokemonDataPromises = pokemons.map(async (pokemon) => {
-      return getPokemonData(pokemon);
-    });
+  const [errorMappingResponse, pokemonDataResult] =
+    mapPokemonDataPromisesResponse(pokemonDataPromisesResponse);
 
-    const pokemonDataPromisesResponse = await Promise.all(pokemonDataPromises);
-
-    const [errorMappingResponse, pokemonDataResult] =
-      mapPokemonDataPromisesResponse(pokemonDataPromisesResponse);
-
-    if (errorMappingResponse.hasError) {
-      return errorResponse(new Error("error fetching pokemon data"));
-    }
-
-    const evolutionChain = [...pokemonDataResult.data];
-
-    return successResponse<PokemonSpecies[]>(evolutionChain);
-  } catch (error) {
-    console.log("error fetching pokemon data");
+  if (errorMappingResponse.hasError) {
     return errorResponse(new Error("error fetching pokemon data"));
   }
+
+  const evolutionChain = [...pokemonDataResult.data];
+
+  return successResponse<PokemonSpecies[]>(evolutionChain);
 };
 
 type MapPokemonDataPromisesResponse = [
@@ -71,46 +72,26 @@ type MapPokemonDataPromisesResponse = [
 ];
 
 const getPokemonData = async (name: string) => {
-  try {
-    const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${name}`);
+  const [error, pokemonDataResult] = await fetchJson<PokemonDataDTO>(
+    `https://pokeapi.co/api/v2/pokemon/${name}`
+  );
+  if (error.hasError) {
+    return errorResponse(error.error!, error.code);
+  }
 
-    if (response.status === 404) {
-      return errorResponse(new Error("Pokemon not found"), 404);
-    }
+  const data = pokemonDataResult.data!;
 
-    const data = await response.json();
-
-    const speciesResponse = await fetch(
+  const [errorPokemonSpecies, pokemonSpeciesDataResult] =
+    await fetchJson<PokemonSpeciesDataDTO>(
       `https://pokeapi.co/api/v2/pokemon-species/${name}`
     );
-
-    if (speciesResponse.status === 404) {
-      return errorResponse(new Error("Pokemon species not found"), 404);
-    }
-
-    const speciesData = await speciesResponse.json();
-
-    const imageUrl = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${data.id}.png`;
-
-    const pokemonData = {
-      id: data.id,
-      name: data.name,
-      imageUrl: imageUrl,
-      generation: speciesData.generation.name,
-      types: data.types.map((type: any) => type.type.name),
-      evolutionChainId: speciesData.evolution_chain.url.split("/")[6],
-      habitat: speciesData.habitat ? speciesData.habitat.name : "unknown",
-      funFacts: speciesData.flavor_text_entries,
-      stats: data.stats.reduce((acc: any, curr: any) => {
-        return { ...acc, [curr.stat.name]: curr.base_stat };
-      }),
-    };
-
-    return successResponse<PokemonSpecies>(pokemonData);
-  } catch (error) {
-    console.log("Error fetching pokemon data", error);
-    return errorResponse(new Error("Error fetching pokemon data"));
+  if (errorPokemonSpecies.hasError) {
+    return errorResponse(errorPokemonSpecies.error!, errorPokemonSpecies.code);
   }
+
+  const speciesData = pokemonSpeciesDataResult.data!;
+
+  return successResponse<PokemonSpecies>(newPokemonSpecies(data, speciesData));
 };
 
 const mapPokemonDataPromisesResponse = (
