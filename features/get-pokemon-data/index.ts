@@ -1,6 +1,10 @@
 import { Pokemon, PokemonSpecies } from "@/entities/pokemon";
 import { fetchJson } from "@/shared/clients/http-fetcher";
 import {
+  PokemonDataDTO,
+  PokemonSpeciesDataDTO,
+} from "@/shared/clients/http-fetcher/dto";
+import {
   ErrorResponse,
   errorResponse,
   successResponse,
@@ -18,7 +22,7 @@ export interface GetPokemonDataSuccessResponse {
 export const getPokemonData = async (
   pokemon: Pokemon
 ): Promise<GetPokemonDataResponse> => {
-  const [error, result] = await fetchJson<PokemonData>(
+  const [error, result] = await fetchJson<PokemonDataDTO>(
     `https://pokeapi.co/api/v2/pokemon/${pokemon.name}`
   );
   if (error.hasError) {
@@ -28,7 +32,7 @@ export const getPokemonData = async (
   const data = result.data!;
 
   const [pokemonSpeciesError, pokemonSpeciesResult] =
-    await fetchJson<PokemonSpeciesData>(
+    await fetchJson<PokemonSpeciesDataDTO>(
       `https://pokeapi.co/api/v2/pokemon-species/${pokemon.name}`
     );
   if (pokemonSpeciesError.hasError) {
@@ -53,20 +57,3 @@ export const getPokemonData = async (
     }, {}),
   });
 };
-
-interface PokemonSpeciesData {
-  id: number;
-  name: string;
-  generation: { name: string };
-  types: { type: { name: string } }[];
-  habitat: { name: string } | null;
-  evolution_chain: { url: string };
-  flavor_text_entries: { flavor_text: string; language: { name: string } }[];
-}
-
-interface PokemonData {
-  id: number;
-  name: string;
-  types: { type: { name: string } }[];
-  stats: { base_stat: number; stat: { name: string } }[];
-}
