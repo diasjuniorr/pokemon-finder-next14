@@ -1,6 +1,10 @@
 import { PokemonSpecies } from "@/entities/pokemon";
 import { GetPokemonSpeciesResponse } from "../get-pokemon-species";
-import { errorResponse, successResponse } from "@/shared/responses";
+import {
+  ErrorResponse,
+  errorResponse,
+  successResponse,
+} from "@/shared/responses";
 import { fetchJson } from "@/shared/clients/http-fetcher";
 import {
   PokemonDataDTO,
@@ -9,15 +13,10 @@ import {
 } from "@/shared/clients/http-fetcher/dto";
 
 type GetPokemonEvolutionChainResponse = [
-  GetPokemonEvolutionChainFailureResponse,
+  ErrorResponse,
   GetPokemonEvolutionChainSuccessResponse
 ];
 
-export interface GetPokemonEvolutionChainFailureResponse {
-  error?: Error;
-  code?: number;
-  hasError: boolean;
-}
 export interface GetPokemonEvolutionChainSuccessResponse {
   data: PokemonSpecies[] | null;
 }
