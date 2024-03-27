@@ -23,7 +23,7 @@ export async function fetchJson<T>(url: string): Promise<FetchJsonResponse<T>> {
 
     return successResponse<T>(await response.json());
   } catch (err) {
-    console.log("Error fetching JSON", err);
+    console.log("error fetching JSON", err);
     return errorResponse(new Error("error fetching JSON"));
   }
 }
